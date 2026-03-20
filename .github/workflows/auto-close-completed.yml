@@ -2,7 +2,7 @@ name: Auto-close completed issues
 
 on:
   issues:
-    types: [labeled, unlabeled]
+    types: [opened, labeled]
 
 jobs:
   close-completed:
@@ -12,11 +12,13 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            if (context.payload.label && context.payload.label.name === 'completed') {
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(l => l.name);
+            if (labels.includes('completed')) {
               github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: context.issue.number,
+                issue_number: issue.number,
                 state: 'closed'
               })
             }
